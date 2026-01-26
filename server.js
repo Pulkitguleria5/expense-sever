@@ -1,28 +1,50 @@
-import express from 'express';
+const mongoose = require('mongoose');
+const express = require('express');
 
-const app = express()
-const arr = [];
-app.use(express.json())
 
-app.post("/register",(req,res)=>{
-    const {name,email} = req.body
-    //check if user already exists
+
+mongoose.connect("")
+  .then(() => console.log('MongoDB Connected'))
+  .catch((error) => console.log('Error Connecting to Database: ', error));
+
+
+
+
+const authRoutes = require('./src/routes/authRoutes');
+
+const app = express();
+
+app.use(express.json());     // Middleware  to access req.body
+app.use('/auth', authRoutes);
+
+app.listen(5001, () => {
+  console.log('Server is running on port 5001');
+});
+
+
+
+
+
+// const app = express()
+// const arr = [];
+// app.use(express.json())
+
+// app.post("/register",(req,res)=>{
+//     const {name,email} = req.body
+//     //check if user already exists
+//     const user = arr.find((user)=> user.email === email  && user.name === name)
+//     if(user){
+//         return res.status(200).send("User already exists")
+//     }
+
     
-    
+//     const userobj = {name,email};
+//     arr.push(userobj);
+//      res.status(400).send(`${name}  ${email}`)
+// })
 
-    const user = arr.find((user)=> user.email === email  && user.name === name)
-    if(user){
-        return res.status(200).send("User already exists")
-    }
+// app.get('/',(req,res)=>{
+//      res.status(200).send("hello world")
+// })
 
-    
-    const userobj = {name,email};
-    arr.push(userobj);
-     res.status(400).send(`${name}  ${email}`)
-})
-
-app.get('/',(req,res)=>{
-     res.status(200).send("hello world")
-})
-
-app.listen(3000)
+// app.listen(3000)
