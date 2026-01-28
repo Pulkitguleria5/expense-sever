@@ -1,6 +1,7 @@
 const users = require("../dao/userDb");
 const userDao = require("../dao/userDao");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 const authController = {
   login: async (request, response) => {
@@ -16,9 +17,36 @@ const authController = {
     //   const user = users.find(
     //     u => u.email === email && u.password === password
     //   );
+
+
+    if (!user) {
+      return response.status(400).json({
+        message: "Invalid email or password",
+      });
+    }
+    
     const isPasswordMatched = await bcrypt.compare(password, user.password);
 
     if (user && isPasswordMatched) {
+      const token = jwt.sign(
+        {
+          name: user.name,
+          email: user.email,
+          id: user._id,
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: "1h" },
+      );
+
+      // For local development you usually do NOT want secure:true
+      // because you’re using http, not https.
+      response.cookie("jwtToken", token, {
+        httpOnly: true,
+        secure: false,
+        domain: "localhost",
+        path: "/",
+      });
+
       return response.status(200).json({
         message: "User authenticated",
         user: user,
@@ -29,7 +57,9 @@ const authController = {
     //       message: 'User authenticated',
     //       user: user
     //     });
-    //   }
+    // }
+
+
     else {
       return response.status(400).json({
         message: "Invalid email or password",

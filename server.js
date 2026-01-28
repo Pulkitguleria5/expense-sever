@@ -1,7 +1,9 @@
 const mongoose = require('mongoose');
 const express = require('express');
 require('dotenv').config();
-
+const cookieParser = require('cookie-parser');
+const authRoutes = require('./src/routes/authRoutes');
+const groupRoutes = require('./src/routes/groupRoutes');
 
 
 mongoose.connect(process.env.MONGO_DB_CONNECTION_URI)
@@ -11,12 +13,16 @@ mongoose.connect(process.env.MONGO_DB_CONNECTION_URI)
 
 
 
-const authRoutes = require('./src/routes/authRoutes');
+
+
 
 const app = express();
 
 app.use(express.json());     // Middleware  to access req.body
+app.use(cookieParser());     // Middleware to access cookies
+
 app.use('/auth', authRoutes);
+app.use('/group', groupRoutes);
 
 app.listen(5001, () => {
   console.log('Server is running on port 5001');
