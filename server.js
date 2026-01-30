@@ -4,11 +4,11 @@ require('dotenv').config();
 const cookieParser = require('cookie-parser');
 const authRoutes = require('./src/routes/authRoutes');
 const groupRoutes = require('./src/routes/groupRoutes');
-
+const cors = require('cors');
 
 mongoose.connect(process.env.MONGO_DB_CONNECTION_URI)
- .then(() => console.log('MongoDB Connected'))
-  .catch((error) => console.log('Error Connecting to Database: ', error));
+.then(() => console.log('MongoDB Connected'))
+.catch((error) => console.log('Error Connecting to Database: ', error));
 
 
 
@@ -17,6 +17,10 @@ mongoose.connect(process.env.MONGO_DB_CONNECTION_URI)
 
 
 const app = express();
+app.use(cors({
+    origin: process.env.CLIENT_URL, // React app domain
+    credentials: true // Allow cookies to be sent
+}));
 
 app.use(express.json());     // Middleware  to access req.body
 app.use(cookieParser());     // Middleware to access cookies

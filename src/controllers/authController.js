@@ -101,27 +101,79 @@ const authController = {
       }
     }
 
-    //   const user = users.find(u => u.email === email);
-    //   if (user) {
-    //     return response.status(400).json({
-    //       message: `User already exist with email: ${email}`
-    //     });
-    //   }
-
-    //   const newUser = {
-    //     id: users.length + 1,
-    //     name,
-    //     email,
-    //     password
-    //   };
-
-    //   users.push(newUser);
-
-    //   return response.status(200).json({
-    //     message: 'User registered',
-    //     user: { id: newUser.id }
-    //   });
   },
-};
+
+    isUserLoggedIn: async (request, response) => {
+      try{
+        const token = request.cookies.jwtToken;
+        if (!token) {
+          return response.status(401).json({
+            message: "Unauthorized  access - No token provided",
+          });
+        }
+
+        jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+          if (err) {
+            return response.status(401).json({
+              message: "Forbidden - Invalid token",
+            });
+          }
+          else {
+            return response.status(200).json({
+              message: "User is logged in",
+              user: user,
+            });
+          }
+        });
+
+      } catch (error) {
+        console.log(error);
+        return response.status(500).json({
+          message: "Internal server error",
+        });
+
+      }
+    },
+
+  logout: (request, response) => {
+    try {
+      response.clearCookie("jwtToken");
+      return response.status(200).json({  
+        message: "User logged out successfully",
+      });
+    }
+    catch (error) {
+      return response.status(500).json({
+        message: "Internal server error",
+      });
+    } 
+  },
+
+ };
+
+
+
+
+  //   const user = users.find(u => u.email === email);
+  //   if (user) {
+  //     return response.status(400).json({
+  //       message: `User already exist with email: ${email}`
+  //     });
+  //   }
+
+  //   const newUser = {
+  //     id: users.length + 1,
+  //     name,
+  //     email,
+  //     password
+  //   };
+
+  //   users.push(newUser);
+
+  //   return response.status(200).json({
+  //     message: 'User registered',
+  //     user: { id: newUser.id }
+  //   });
+
 
 module.exports = authController;
