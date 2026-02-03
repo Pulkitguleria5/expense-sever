@@ -15,7 +15,7 @@ const groupController = {
         description,
         thumbnail,
         adminEmail : user.email,
-        allMembers,
+        membersEmail: allMembers,
         paymentStatus: {
           amount: 0,
           currency: "INR",
@@ -23,7 +23,7 @@ const groupController = {
           isPaid: false,
         },
       });
-      res.status(200).json({
+      res.status(201).json({
         message: "Group created successfully",
         groupid: newGroup._id,
       });
@@ -38,10 +38,10 @@ const groupController = {
 
   update: async (req, res) => {
     try {
-      const { id } = req.params;
+      // const { id } = req.params;
       const { name, description, thumbnail, adminEmail, paymentStatus } =
         req.body;
-      const updatedGroup = await groupDao.updateGroup(id, {
+      const updatedGroup = await groupDao.updateGroup({
         name,
         description,
         thumbnail,
@@ -62,9 +62,9 @@ const groupController = {
 
   addMember: async (req, res) => {
     try {
-      const { id } = req.params;
-      const { membersEmail } = req.body;
-      const updatedGroup = await groupDao.addMember(id, ...membersEmail);
+      // const { id } = req.params;
+      const { groupId, emails } = req.body;
+      const updatedGroup = await groupDao.addMember(groupId, ...emails);
       res.status(200).json({
         message: "Member added successfully",
         group: updatedGroup,
@@ -79,9 +79,9 @@ const groupController = {
 
   removeMember: async (req, res) => {
     try {
-      const { id } = req.params;
-      const { membersEmail } = req.body;
-      const updatedGroup = await groupDao.removeMember(id, ...membersEmail);
+      // const { id } = req.params;
+      const { groupId, emails } = req.body;
+      const updatedGroup = await groupDao.removeMember(groupId, ...emails);
       res.status(200).json({
         message: "Member removed successfully",
         group: updatedGroup,
@@ -95,10 +95,10 @@ const groupController = {
   },
 
 
-  getGroupsByEmail: async (req, res) => {
+  getGroupsByUser: async (req, res) => {
     try {
-      const user = req.user;
-      const groups = await groupDao.getGroupByEmail(user.email);
+      const email = req.user.email;
+      const groups = await groupDao.getGroupsByEmail(email);
       res.status(200).json({
         message: "Groups retrieved successfully",
         groups: groups,
@@ -115,8 +115,10 @@ const groupController = {
 
   getGroupByStatus: async (req, res) => {
     try {
-      const { id } = req.params;
-      const group = await groupDao.getGroupByStatus(id);
+      // const { id } = req.params;
+      const {isPaid} = req.query;
+      const status = { isPaid: isPaid === 'true' };
+      const group = await groupDao.getGroupByStatus(status);
       res.status(200).json({
         message: "Group retrieved successfully",
         group: group,

@@ -44,16 +44,17 @@ const groupDao = {
   },
 
   getGroupByEmail: async (email) => {
-    return await Group.find({ membersEmail: email });
+  return await Group.find({ membersEmail: email });
   },
 
-  getGroupByStatus: async (id) => {
-    return await Group.findById(id);
+  getGroupByStatus: async (status) => {
+  return await Group.find({ "paymentStatus.isPaid": status });
   },
 
   // NOTE: There is no audit-log schema yet; this is a placeholder using Group itself.
   getAuditLogs: async (groupId) => {
-    return await Group.find({ _id: groupId }).sort({ createdAt: -1 });
+    const group = await Group.findById(groupId).select('paymentStatus.date');
+    return group ? group.paymentStatus : null;
   },
 };
 
