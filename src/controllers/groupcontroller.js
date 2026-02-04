@@ -97,7 +97,7 @@ const groupController = {
 
   getGroupsByUser: async (req, res) => {
     try {
-      const email = req.user.email;
+      const email = req.user.email;    //token
       const groups = await groupDao.getGroupsByEmail(email);
       res.status(200).json({
         message: "Groups retrieved successfully",
