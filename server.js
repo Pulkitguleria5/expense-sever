@@ -1,61 +1,33 @@
-const mongoose = require('mongoose');
-const express = require('express');
 require('dotenv').config();
+const express = require('express');
 const cookieParser = require('cookie-parser');
-const authRoutes = require('./src/routes/authRoutes');
-const groupRoutes = require('./src/routes/groupRoutes');
 const cors = require('cors');
 
+const mongoose = require('mongoose');
+const authRoutes = require('./src/routes/authRoutes');
+const groupRoutes = require('./src/routes/groupRoutes');
+const rbacRoutes = require('./src/routes/rbacRoutes');
+
+
 mongoose.connect(process.env.MONGO_DB_CONNECTION_URI)
-.then(() => console.log('MongoDB Connected'))
-.catch((error) => console.log('Error Connecting to Database: ', error));
+    .then(() => console.log('MongoDB Connected'))
+    .catch((error) => console.log('Error Connecting to Database: ', error));
 
-
-
-
-
-
+const corsOption = {
+    origin: process.env.CLIENT_URL,
+    credentials: true
+};
 
 const app = express();
-app.use(cors({
-    origin: process.env.CLIENT_URL, // React app domain
-    credentials: true // Allow cookies to be sent
-}));
 
-app.use(express.json());     // Middleware  to access req.body
-app.use(cookieParser());     // Middleware to access cookies
+app.use(cors(corsOption));
+app.use(express.json()); // Middleware
+app.use(cookieParser()); // Middleware
 
 app.use('/auth', authRoutes);
-app.use('/group', groupRoutes);
+app.use('/groups', groupRoutes);
+app.use('/users', rbacRoutes);
 
 app.listen(5001, () => {
-  console.log('Server is running on port 5001');
+    console.log('Server is running on port 5001');
 });
-
-
-
-
-
-// const app = express()
-// const arr = [];
-// app.use(express.json())
-
-// app.post("/register",(req,res)=>{
-//     const {name,email} = req.body
-//     //check if user already exists
-//     const user = arr.find((user)=> user.email === email  && user.name === name)
-//     if(user){
-//         return res.status(200).send("User already exists")
-//     }
-
-    
-//     const userobj = {name,email};
-//     arr.push(userobj);
-//      res.status(400).send(`${name}  ${email}`)
-// })
-
-// app.get('/',(req,res)=>{
-//      res.status(200).send("hello world")
-// })
-
-// app.listen(3000)
