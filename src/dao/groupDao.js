@@ -2,8 +2,7 @@ const Group = require("../model/group");
 
 const groupDao = {
     createGroup: async (data) => {
-        const newGroup = new Group(data);
-        return await newGroup.save();
+        return await Group.create(data);
     },
 
     updateGroup: async (data) => {
