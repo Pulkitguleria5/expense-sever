@@ -14,5 +14,6 @@ router.patch('/members/remove',authorizeMiddleware('group:update'), groupControl
 router.get('/my-groups',authorizeMiddleware('group:view'), groupController.getGroupsByUser);
 router.get('/status',authorizeMiddleware('group:view'), groupController.getGroupsByPaymentStatus);
 router.get('/:groupId/audit',authorizeMiddleware('group:view'), groupController.getAudit);
+router.get('/:groupId',authorizeMiddleware('group:view'), groupController.getGroupById);
 
 module.exports = router;

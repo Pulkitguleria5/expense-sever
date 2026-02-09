@@ -5,13 +5,13 @@ const expenseSchema = new mongoose.Schema({
     amount: { type: Number, required: true },
     description: { type: String, required: true },
     date: { type: Date,default: Date.now() },
-    paidBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    paidBy: { type: String, required: true },
 
     split :[{
-            userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+            userEmail: { type: String, required: true },
             splitAmount: { type: Number, required: true },
     }],
-    excludedMembers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    excludedMembers: [{ type: String, required: false }],
     settled: { type: Boolean, default: false }
 
 

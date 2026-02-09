@@ -24,9 +24,9 @@ const expenseDao = {
         return await Expense.findById(expenseId);
     },
 
-    updateSplitAmount: async (expenseId, userId, amount) => {
+    updateSplitAmount: async (expenseId, userEmail, amount) => {
         return await Expense.findOneAndUpdate(
-            { _id: expenseId, "split.userId": userId },
+            { _id: expenseId, "split.userEmail": userEmail },
             {
                 $set: { "split.$.splitAmount": amount }
             },
@@ -34,11 +34,11 @@ const expenseDao = {
         );
     },
 
-    addSplitUser: async (expenseId, userId, amount) => {
+    addSplitUser: async (expenseId, userEmail, amount) => {
         return await Expense.findByIdAndUpdate(
             expenseId,
             {
-                $push: { split: { userId, splitAmount: amount } }
+                $push: { split: { userEmail, splitAmount: amount } }
             },
             { new: true }
         );
@@ -48,11 +48,18 @@ const expenseDao = {
         return await Expense.findByIdAndDelete(expenseId);
     },
 
+    getUnsettledExpensesByGroupId: async (groupId) => {
+        return await Expense.find({ groupId, settled: false });
+    },
 
+    markAllExpensesAsSettled: async (groupId) => {
+        return await Expense.updateMany(
+            { groupId, settled: false },
+            { $set: { settled: true } }
+        );
+    },
 
-
-
-
+};
 
 
 

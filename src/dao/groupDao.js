@@ -1,3 +1,4 @@
+const { skipMiddlewareFunction } = require("mongoose");
 const Group = require("../model/group");
 
 const groupDao = {
@@ -46,7 +47,32 @@ const groupDao = {
         // is the date within paymentStatus.
         const group = await Group.findById(groupId).select('paymentStatus.date');
         return group ? group.paymentStatus.date : null;
-    }
+    },
+
+    getGroupsPaginated: async (email, limit ,skip,sortOptions ={createdAt:-1}) => {
+        //find groups by email, 
+        //then sort to preserve order
+
+        const [groups, total] = await Promise.all([
+            Group.find({ membersEmail: email })
+            .sort({sortOptions})
+            .skip(skip)
+            .limit(limit),
+
+            //cout number of groups for pagination
+            Group.countDocuments({ membersEmail: email })
+        ]);
+
+        return { groups, total };
+    },
+
+    getGroupById: async (groupId) => {
+        return await Group.findById(groupId);
+    },
 };
 
 module.exports = groupDao;
+
+
+
+//promises takes array of function run them parallel and return the result when all of them are done. It is useful when you have multiple async operations that can be run in parallel, and you want to wait for all of them to complete before proceeding. For example, if you have an array of user IDs and you want to fetch their details from the database, you can use Promise.all to run all the fetch operations in parallel and get the results once they are all done.
