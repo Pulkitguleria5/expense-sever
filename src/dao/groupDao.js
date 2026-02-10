@@ -7,16 +7,16 @@ const groupDao = {
     },
 
     updateGroup: async (data) => {
-        const { groupId, name, description, thumbnail, adminEmail, paymentStatus } = data;
+        const { groupId, ...updateFields } = data;
 
         return await Group.findByIdAndUpdate(groupId, {
-            name, description, thumbnail, adminEmail, paymentStatus,
+            $set: updateFields
         }, { new: true });
     },
 
     addMembers: async (groupId, ...membersEmails) => {
         return await Group.findByIdAndUpdate(groupId, {
-            $addToSet: { membersEmail: { $each: membersEmails }}
+            $addToSet: { membersEmail: { $each: membersEmails } }
         }, { new: true });
     },
 
@@ -49,15 +49,15 @@ const groupDao = {
         return group ? group.paymentStatus.date : null;
     },
 
-    getGroupsPaginated: async (email, limit ,skip,sortOptions ={createdAt:-1}) => {
+    getGroupsPaginated: async (email, limit, skip, sortOptions = { createdAt: -1 }) => {
         //find groups by email, 
         //then sort to preserve order
 
         const [groups, total] = await Promise.all([
             Group.find({ membersEmail: email })
-            .sort({sortOptions})
-            .skip(skip)
-            .limit(limit),
+                .sort(sortOptions)
+                .skip(skip)
+                .limit(limit),
 
             //cout number of groups for pagination
             Group.countDocuments({ membersEmail: email })
@@ -68,6 +68,12 @@ const groupDao = {
 
     getGroupById: async (groupId) => {
         return await Group.findById(groupId);
+    },
+
+    unsettleGroup: async (groupId) => {
+        return await Group.findByIdAndUpdate(groupId, {
+            $set: { "paymentStatus.isPaid": false }
+        }, { new: true });
     },
 };
 

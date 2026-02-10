@@ -1,5 +1,6 @@
 const expenseDao = require('../dao/expenseDao');
 const groupDao = require('../dao/groupDao');
+const userDao = require('../dao/userDao');
 
 const expenseController = {
 
@@ -20,13 +21,13 @@ const expenseController = {
                 return response.status(403).json({ message: "User not part of this group" });
             }
 
-            // only admin can create expense
-            if (group.adminEmail !== user.email) {
-                return response.status(403).json({ message: "Only group admin can create expense" });
+            // allow any member to create expense
+            if (!group.membersEmail.includes(user.email)) {
+                return response.status(403).json({ message: "User is not a member of the group" });
             }
 
             // validate paidBy user
-            const paidByUser = await groupDao.getUserByEmail(paidBy);
+            const paidByUser = await userDao.findByEmail(paidBy);
             if (!paidByUser) {
                 return response.status(400).json({ message: "Paid by user not found" });
             }
@@ -72,6 +73,11 @@ const expenseController = {
                 excludedMembers,
                 settled: false
             });
+
+            // If the group was settled, adding a new expense means it's no longer settled
+            if (group.paymentStatus && group.paymentStatus.isPaid) {
+                await groupDao.unsettleGroup(groupId);
+            }
 
             response.status(201).json({
                 message: "Expense created successfully",
@@ -248,7 +254,7 @@ const expenseController = {
             }
 
             const expenses = await expenseDao.getUnsettledExpensesByGroupId(groupId);
-            
+
             const balances = {};
             group.membersEmail.forEach(email => {
                 balances[email] = 0;
@@ -257,19 +263,18 @@ const expenseController = {
             expenses.forEach(expense => {
                 const paidBy = expense.paidBy;
                 const totalAmount = expense.amount;
-                const paidByInSplit = expense.split.find(s => s.userEmail === paidBy);
 
-                if (paidByInSplit) {
-                    balances[paidBy] += (totalAmount - paidByInSplit.splitAmount);
-                } else {
+                // Credit the payer with the full amount (how much they are owed)
+                if (balances.hasOwnProperty(paidBy)) {
                     balances[paidBy] += totalAmount;
                 }
 
+                // Debit each user in the split (how much they owe)
                 expense.split.forEach(splitItem => {
                     const splitUser = splitItem.userEmail;
                     const splitAmount = splitItem.splitAmount;
 
-                    if (splitUser !== paidBy) {
+                    if (balances.hasOwnProperty(splitUser)) {
                         balances[splitUser] -= splitAmount;
                     }
                 });

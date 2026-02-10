@@ -8,6 +8,7 @@ const authRoutes = require('./src/routes/authRoutes');
 const groupRoutes = require('./src/routes/groupRoutes');
 const rbacRoutes = require('./src/routes/rbacRoutes');
 const expenseRoutes = require('./src/routes/expenseRoutes');
+// const profileRoutes = require('./src/routes/profileRoutes');
 
 
 mongoose.connect(process.env.MONGO_DB_CONNECTION_URI)
@@ -29,6 +30,8 @@ app.use('/auth', authRoutes);
 app.use('/groups', groupRoutes);
 app.use('/users', rbacRoutes);
 app.use('/expenses', expenseRoutes);
+
+// app.use('/profile', profileRoutes);
 
 app.listen(5001, () => {
     console.log('Server is running on port 5001');

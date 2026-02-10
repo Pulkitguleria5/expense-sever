@@ -71,13 +71,14 @@ const groupController = {
     getGroupsByUser: async (request, response) => {
         try {
             const email = request.user.email;
+
             const page = parseInt(request.query.page) || 1;
             const limit = parseInt(request.query.limit) || 10;
-            
+
             const skip = (page - 1) * limit;      //for record not for page number, so if page 1 then skip 0, if page 2 then skip 10 and so on.
             const sortBy = request.query.sortBy || 'newest'; // default sorting by newest
-            let sortOptions = {createdAt: -1}; // default to newest first
-            const name = request.query.name || '';
+            let sortOptions = { createdAt: -1 }; // default to newest first
+            const name = request.query.nameSort || '';
             //sort by name 
             if (name) {
                 sortOptions = { name: name === 'asc' ? 1 : -1 };  // if name=asc then sort by name in ascending order, if name=desc then sort by name in descending order
@@ -85,24 +86,30 @@ const groupController = {
                 sortOptions.createdAt = 1; // oldest first
             } else if (sortBy === 'newest') {
                 sortOptions.createdAt = -1; // newest first
-            } 
-            
-            
+            }
 
-            const { groups, total } = await groupDao.getGroupsPaginated(email, limit, skip, sortOptions );
-            response.status(200).json({ 
-                groups:groups,
-               pagination: {
-                totalItems: total,
-                currentPage: page,
-                totalPages: Math.ceil(total / limit),
-                itemsPerPage: limit
+
+
+            const { groups, total } = await groupDao.getGroupsPaginated(email, limit, skip, sortOptions);
+            response.status(200).json({
+                groups: groups,
+                pagination: {
+                    totalItems: total,
+                    currentPage: page,
+                    totalPages: Math.ceil(total / limit),
+                    itemsPerPage: limit
 
                 }
-               });
+            });
+
+
         }
-         catch (error) {
-            response.status(500).json({ message: "Error fetching groups" });
+        catch (error) {
+            console.error("getGroupsByUser ERROR:", error);
+            response.status(500).json({
+                message: "Error fetching groups",
+                error: error.message
+            });
         }
     },
 
