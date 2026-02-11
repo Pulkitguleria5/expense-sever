@@ -13,6 +13,7 @@ const permissions = {
         'expense:update',
         'expense:delete',
         'expense:view',
+        'payment:create',
         
 
 

@@ -8,7 +8,9 @@ const authRoutes = require('./src/routes/authRoutes');
 const groupRoutes = require('./src/routes/groupRoutes');
 const rbacRoutes = require('./src/routes/rbacRoutes');
 const expenseRoutes = require('./src/routes/expenseRoutes');
-// const profileRoutes = require('./src/routes/profileRoutes');
+const profileRoutes = require('./src/routes/profileRoutes');
+const paymentsRoutes = require('./src/routes/paymentRoutes');
+
 
 
 mongoose.connect(process.env.MONGO_DB_CONNECTION_URI)
@@ -30,6 +32,8 @@ app.use('/auth', authRoutes);
 app.use('/groups', groupRoutes);
 app.use('/users', rbacRoutes);
 app.use('/expenses', expenseRoutes);
+app.use('/payments', paymentsRoutes);
+app.use('/profile', profileRoutes);
 
 // app.use('/profile', profileRoutes);
 

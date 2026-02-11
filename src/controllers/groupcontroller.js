@@ -1,10 +1,27 @@
 const groupDao = require("../dao/groupDao");
+const userDao = require('../dao/userDao');
 
 const groupController = {
 
     create: async (request, response) => {
         try {
             const user = request.user;
+            const userInfo = await userDao.findByEmail(request.user.email);
+
+            // Backward compatibility
+            if (userInfo.credits === undefined) {
+                userInfo.credits = 1;
+            }
+
+            if (Number(userInfo.credits) === 0) {
+                return response.status(400).json({
+                    message: 'You do not have enough credits to perform this operation'
+                });
+            }
+
+
+
+
             const { name, description, membersEmail, thumbnail } = request.body;
 
             let allMembers = [user.email];
@@ -25,11 +42,15 @@ const groupController = {
                     isPaid: false
                 }
             });
+            userInfo.credits -= 1;
+            await userInfo.save();
 
             response.status(201).json({
                 message: 'Group created successfully',
                 groupId: newGroup._id
             });
+
+
         } catch (error) {
             console.error(error);
             response.status(500).json({ message: "Internal server error" });
@@ -76,9 +97,11 @@ const groupController = {
             const limit = parseInt(request.query.limit) || 10;
 
             const skip = (page - 1) * limit;      //for record not for page number, so if page 1 then skip 0, if page 2 then skip 10 and so on.
+
             const sortBy = request.query.sortBy || 'newest'; // default sorting by newest
             let sortOptions = { createdAt: -1 }; // default to newest first
             const name = request.query.nameSort || '';
+
             //sort by name 
             if (name) {
                 sortOptions = { name: name === 'asc' ? 1 : -1 };  // if name=asc then sort by name in ascending order, if name=desc then sort by name in descending order
